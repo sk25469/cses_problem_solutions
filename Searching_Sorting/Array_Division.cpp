@@ -224,29 +224,44 @@ void solve()
 {
     int n, k;
     cin >> n >> k;
-    ll ar[n];
-    inarr(ar, n);
+    vll ar(n);
+    for (int i = 0; i < n; i++)
+        cin >> ar[i];
+    // debug(ar);
 
-    int l = 0;
-    ll res = 0;
-    un_m<ll, int> mp;
-    int siz = 0;
-    for (int r = 0; r < n; r++)
+    auto works = [&](ll mid)
     {
-        mp[ar[r]]++;
-        if (mp[ar[r]] == 1)
-            siz++;
-
-        while (siz > k)
+        ll sum = 0;
+        int grp = 0;
+        for (int i = 0; i < n; i++)
         {
-            mp[ar[l]]--;
-            if (mp[ar[l]] == 0)
-                siz--;
-            l++;
+            if (ar[i] > mid)
+                return false;
+            if (sum + ar[i] > mid)
+                sum = 0, grp++;
+            sum += ar[i];
         }
-        res += r - l + 1;
+
+        if (sum > 0)
+            grp++;
+        return grp <= k;
+    };
+
+    ll l = 0, r = 1e18, ans = 0;
+    while (l <= r)
+    {
+        ll mid = l + (r - l) / 2;
+
+        if (works(mid))
+        {
+            ans = mid;
+            r = mid - 1;
+        }
+        else
+            l = mid + 1;
     }
-    out(res);
+
+    cout << ans << endl;
 }
 
 int main()

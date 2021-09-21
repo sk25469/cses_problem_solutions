@@ -4,6 +4,9 @@
 #include <bits/stdc++.h>
 #include <time.h>
 #include <numeric>
+#include <ext/pb_ds/assoc_container.hpp>
+#include <ext/pb_ds/tree_policy.hpp>
+using namespace __gnu_pbds;
 
 using namespace std;
 
@@ -59,6 +62,9 @@ void _print(T t, V... v)
 #endif
 
 // debug template ends
+
+template <typename T>
+using ordered_set = tree<T, null_type, less<T>, rb_tree_tag, tree_order_statistics_node_update>;
 
 #define ll long long
 #define w(t) while (t--)
@@ -224,29 +230,23 @@ void solve()
 {
     int n, k;
     cin >> n >> k;
-    ll ar[n];
-    inarr(ar, n);
+    ordered_set<pair<int, int>> window;
+    vll ar(n);
+    for (int i = 0; i < n; i++)
+        cin >> ar[i];
 
-    int l = 0;
-    ll res = 0;
-    un_m<ll, int> mp;
-    int siz = 0;
-    for (int r = 0; r < n; r++)
+    for (int i = 0; i < k; i++)
+        window.insert({ar[i], i});
+    cout << window.find_by_order((k - 1) / 2)->first << " ";
+
+    for (int i = 1; i < n - k + 1; i++)
     {
-        mp[ar[r]]++;
-        if (mp[ar[r]] == 1)
-            siz++;
-
-        while (siz > k)
-        {
-            mp[ar[l]]--;
-            if (mp[ar[l]] == 0)
-                siz--;
-            l++;
-        }
-        res += r - l + 1;
+        window.erase({ar[i - 1], i - 1});
+        window.insert({ar[i + k - 1], i + k - 1});
+        cout << window.find_by_order((k - 1) / 2)->first << " ";
     }
-    out(res);
+
+    cout << endl;
 }
 
 int main()
