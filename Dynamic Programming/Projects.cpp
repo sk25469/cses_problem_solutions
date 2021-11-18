@@ -184,31 +184,50 @@ ll binpow(ll a, ll b)
     return res;
 }
 
+bool comp(const pair<int, pii> &a, const pair<int, pii> &b)
+{
+    return a.second.first < b.second.first;
+}
+
 void solve()
 {
     int n;
     cin >> n;
+    vec<pair<int, pii>> ar(n + 1);
 
-    vi ar(n);
-    inarr(ar, n);
-
-    vi lis;
-
-    for (int i = 0; i < n; i++)
+    for (int i = 1; i <= n; i++)
     {
-        if (lis.size() == 0)
-            lis.pb(ar[i]);
-        else
-        {
-            auto it = lower_bound(all(lis), ar[i]);
-            if (it == lis.end())
-                lis.pb(ar[i]);
-            else
-                lis[it - lis.begin()] = ar[i];
-        }
+        int st, end, rew;
+        cin >> st >> end >> rew;
+        ar[i] = {st, {end, rew}};
     }
-    debug(lis);
-    cout << lis.size() << endl;
+
+    sort(all(ar), comp);
+
+    vector<int> endPoints;
+    for (int i = 1; i <= n; i++)
+        endPoints.pb(ar[i].second.first);
+    debug(ar);
+    debug(endPoints);
+
+    ll dp[n + 1] = {0};
+    dp[0] = 0;
+
+    for (int i = 1; i <= n; i++)
+    {
+        ll notTaking = dp[i - 1];
+        ll taking = ar[i].second.second;
+
+        // the last index such that endpoint(j) < startpoint(i)
+        auto ind = lower_bound(all(endPoints), ar[i].first);
+        int index = ind - endPoints.begin();
+        debug(index);
+
+        taking += dp[index];
+        dp[i] = max(notTaking, taking);
+    }
+
+    cout << dp[n] << endl;
 }
 
 int main()

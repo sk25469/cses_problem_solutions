@@ -188,27 +188,40 @@ void solve()
 {
     int n;
     cin >> n;
+    ll x;
+    cin >> x;
 
-    vi ar(n);
-    inarr(ar, n);
+    vector<pii> best(1 << n);
+    best[0] = {1, 0};
 
-    vi lis;
+    vector<ll> ar(n);
+    for (auto &i : ar)
+        cin >> i;
 
-    for (int i = 0; i < n; i++)
+    for (int s = 1; s < (1 << n); s++)
     {
-        if (lis.size() == 0)
-            lis.pb(ar[i]);
-        else
+        // initialize it to max value possible
+        best[s] = {n + 1, 0};
+
+        for (int p = 0; p < n; p++)
         {
-            auto it = lower_bound(all(lis), ar[i]);
-            if (it == lis.end())
-                lis.pb(ar[i]);
-            else
-                lis[it - lis.begin()] = ar[i];
+            if (s & (1 << p))
+            {
+                auto option = best[s ^ (1 << p)];
+                if (option.second + ar[p] <= x)
+                    option.second += ar[p];
+                else
+                {
+                    option.second = ar[p];
+                    option.first++;
+                }
+                best[s] = min(best[s], option);
+            }
         }
     }
-    debug(lis);
-    cout << lis.size() << endl;
+
+    debug(best);
+    cout << best[(1 << n) - 1].first << endl;
 }
 
 int main()
