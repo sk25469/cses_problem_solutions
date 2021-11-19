@@ -121,108 +121,60 @@ inline int64_t add(int64_t a, int64_t b)
     return (a + b >= INF ? INF : a + b);
 }
 
-vector<bool> sieve(ll n)
+void generate_next_masks(int current_mask, int i, int next_mask, int n,
+                         vector<int> &next_masks)
 {
-    vector<bool> isPrime(n + 1, 0);
-    isPrime[0] = isPrime[1] = true;
-
-    for (int i = 2; i * i <= n; i++)
+    if (i == n + 1)
     {
-        if (isPrime[i])
-        {
-            for (int j = i * i; j <= n; j += i)
-                isPrime[j] = false;
-        }
+        next_masks.push_back(next_mask);
+        return;
     }
 
-    // after this, all the numbers which are primes are marked as 1
-    return isPrime;
+    if ((current_mask & (1 << i)) != 0)
+        generate_next_masks(current_mask, i + 1, next_mask, n, next_masks);
+
+    if (i != n)
+        if ((current_mask & (1 << i)) == 0 && (current_mask & (1 << (i + 1))) == 0)
+            generate_next_masks(current_mask, i + 2, next_mask, n, next_masks);
+
+    if ((current_mask & (1 << i)) == 0)
+        generate_next_masks(current_mask, i + 1, next_mask + (1 << i), n, next_masks);
 }
 
-bool isPerfectSquare(ll x)
+int dp[1001][1 << 11];
+int repeat(int col, int mask, const int m, const int n)
 {
-    // Find floating point value of
-    // square root of x.
-    if (x >= 0)
+    // BASE CASE
+    if (col == m + 1)
     {
-
-        long long sr = sqrt(x);
-
-        // if product of square root
-        // is equal, then
-        // return T/F
-        return (sr * sr == x);
+        if (mask == 0)
+            return 1;
+        return 0;
     }
-    // else return false if n<0
-    return false;
-}
 
-bool isPrime(ll n)
-{
-    if (n == 0 || n == 1)
-        return false;
+    if (dp[col][mask] != -1)
+        return dp[col][mask];
 
-    for (int i = 2; i * i <= n; i++)
+    int answer = 0;
+    vector<int> next_masks;
+    generate_next_masks(mask, 1, 0, n, next_masks);
+
+    for (int next_mask : next_masks)
     {
-        if (n % i == 0)
-            return false;
+        answer = (answer + repeat(col + 1, next_mask, m, n)) % MOD;
     }
-    return true;
-}
 
-// a to power b
-ll binpow(ll a, ll b)
-{
-    ll res = 1;
-    while (b > 0)
-    {
-        if (b & 1)
-            res = res * a;
-        a = a * a;
-        b >>= 1;
-    }
-    return res;
+    return dp[col][mask] = answer;
 }
 
 void solve()
 {
-    int n;
-    cin >> n;
-    ll x;
-    cin >> x;
+    int row, col;
+    cin >> row >> col;
 
-    vector<pii> best(1 << n);
-    best[0] = {1, 0};
+    mem(dp, -1);
 
-    vector<ll> ar(n);
-    for (auto &i : ar)
-        cin >> i;
-
-    for (int s = 1; s < (1 << n); s++)
-    {
-        // initialize it to max value possible
-        best[s] = {n + 1, 0};
-
-        for (int p = 0; p < n; p++)
-        {
-            if (s & (1 << p))
-            {
-                // s ^ (1 << p) gives the chance to continue the previous state
-                auto option = best[s ^ (1 << p)];
-                if (option.second + ar[p] <= x)
-                    option.second += ar[p];
-                else
-                {
-                    option.second = ar[p];
-                    option.first++;
-                }
-                best[s] = min(best[s], option);
-            }
-        }
-    }
-
-    debug(best);
-    cout << best[(1 << n) - 1].first << endl;
+    cout << repeat(1, 0, row, col) << nl;
 }
 
 int main()
