@@ -212,6 +212,7 @@ ll bellmanFord(int src, int end)
 
             if (dist[frm] == INF)
                 continue;
+
             dist[to] = max(dist[to], NINF);
 
             if (dist[frm] + weight < dist[to])
