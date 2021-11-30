@@ -174,6 +174,12 @@ ll binpow(ll a, ll b)
     return res;
 }
 
+// dijsktra will only work with monotonic or negatively monotonic functions
+// of weighted directed acyclic graphs
+
+// in case of negative weights, dont ever use a visited array, because
+// dijsktra assumes that once we get to a node, we know the best ans
+// to reach that node, but that is not true in the case of negative weights
 void solve()
 {
     int n, m;
