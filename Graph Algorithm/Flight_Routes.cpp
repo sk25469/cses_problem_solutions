@@ -94,7 +94,9 @@ using ordered_set = tree<T, null_type, less<T>, rb_tree_tag, tree_order_statisti
 #define mx_c(container) max_element(container.begin(), container.end())
 #define mn_c(container) min_element(container.begin(), container.end())
 #define un_m unordered_map
-#define read(x) cin >> x
+#define read1(x) cin >> x
+#define read2(x, y) cin >> x >> y
+#define read3(x, y, z) cin >> x >> y >> z
 #define NOT_FOUND string::npos
 #define vec_2d vector<vector<int>>
 
@@ -103,7 +105,7 @@ using ordered_set = tree<T, null_type, less<T>, rb_tree_tag, tree_order_statisti
     cin.tie(NULL);                    \
     cout.tie(NULL);
 
-const ll INF = 5e18;
+const ll INF = 1e18;
 const int MOD = 1e9 + 7;
 
 inline int64_t mul(int64_t a, int64_t b)
@@ -171,79 +173,64 @@ ll binpow(ll a, ll b)
     }
     return res;
 }
-struct Edge
-{
-    int a, b;
-    ll cost;
-    Edge(int a, int b, int cost)
-    {
-        this->a = a;
-        this->b = b;
-        this->cost = cost;
-    }
-};
 
-int n, m;
-vector<Edge> edges;
-
-vector<int> negativeCycle()
-{
-    vector<ll> d(n, INF);
-    vector<int> p(n, -1);
-    int x;
-    for (int i = 0; i < n; ++i)
-    {
-        x = -1;
-        for (Edge e : edges)
-        {
-            if (d[e.a] + e.cost < d[e.b])
-            {
-                d[e.b] = d[e.a] + e.cost;
-                p[e.b] = e.a;
-                x = e.b;
-            }
-        }
-    }
-
-    if (x == -1)
-        return {};
-
-    debug(d);
-    for (int i = 0; i < n; ++i)
-        x = p[x];
-
-    vector<int> cycle;
-    for (int v = x;; v = p[v])
-    {
-        cycle.push_back(v);
-        if (v == x && cycle.size() > 1)
-            break;
-    }
-    reverse(cycle.begin(), cycle.end());
-    return cycle;
-}
+const int N = 1e5 + 1;
+priority_queue<pll, vector<pll>, greater<pll>> pq; // node, best dist
+priority_queue<ll> best[N];                        // for each node, store its k best distance
+vec<pll> adj[N];
+int n, m, k;
 
 void solve()
 {
-    cin >> n >> m;
+    read3(n, m, k);
     for (int i = 0; i < m; i++)
     {
         int x, y;
         ll cost;
-        cin >> x >> y >> cost;
-        edges.pb(Edge(x, y, cost));
+        read3(x, y, cost);
+        adj[x].pb({y, cost});
     }
 
-    vector<int> cycle = negativeCycle();
-    if (cycle.empty())
-        cout << "NO\n";
-    else
+    pq.push({1, 0});
+    best[1].push(0);
+
+    while (!pq.empty())
     {
-        cout << "YES\n";
-        for (auto x : cycle)
-            cout << x << " ";
-        cout << endl;
+        int curr = pq.top().first;
+        ll dist = pq.top().second;
+        pq.pop();
+
+        if (dist > best[curr].top())
+            continue;
+
+        for (auto &next : adj[curr])
+        {
+            ll tempDist = dist + next.second;
+            if (best[next.first].size() < k)
+            {
+                best[next.first].push(tempDist);
+                pq.push({next.first, tempDist});
+            }
+            else if (tempDist < best[next.first].top())
+            {
+                best[next.first].pop();
+                best[next.first].push(tempDist);
+                pq.push({next.first, tempDist});
+            }
+        }
     }
+
+    vector<ll> ans;
+    while (best[n].size())
+    {
+        ans.pb(best[n].top());
+        best[n].pop();
+    }
+    reverse(all(ans));
+
+    for (auto x : ans)
+        cout << x << " ";
+    cout << endl;
 }
 
 int main()
