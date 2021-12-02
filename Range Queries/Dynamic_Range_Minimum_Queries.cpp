@@ -174,30 +174,72 @@ ll binpow(ll a, ll b)
     return res;
 }
 
+const int MAXN = 2e5 + 2;
+int seg[4 * MAXN];
+vi ar(MAXN);
+int n, m;
+
+void build(int v, int tl, int tr)
+{
+    if (tl == tr)
+        seg[v] = ar[tl];
+    else
+    {
+        int tm = tl + (tr - tl) / 2;
+        build(2 * v, tl, tm);
+        build(2 * v + 1, tm + 1, tr);
+        seg[v] = min(seg[2 * v], seg[2 * v + 1]);
+    }
+}
+
+int minVal(int v, int tl, int tr, int l, int r)
+{
+    if (l > r)
+        return INT_MAX;
+
+    if (l == tl && r == tr)
+        return seg[v];
+
+    int tm = tl + (tr - tl) / 2;
+    return min(minVal(2 * v, tl, tm, l, min(r, tm)),
+               minVal(2 * v + 1, tm + 1, tr, max(l, tm + 1), r));
+}
+
+void update(int v, int tl, int tr, int pos, int val)
+{
+    if (tl == tr)
+        seg[v] = val;
+    else
+    {
+        int tm = tl + (tr - tl) / 2;
+        if (pos <= tm)
+            update(2 * v, tl, tm, pos, val);
+        else
+            update(2 * v + 1, tm + 1, tr, pos, val);
+        seg[v] = min(seg[2 * v], seg[2 * v + 1]);
+    }
+}
+
 void solve()
 {
-    int n, m;
-    read2(n, m);
-    vll ar(n);
-
-    inarr(ar, n);
-    vll pref(n);
-    pref[0] = ar[0];
-
-    For(i, 1, n)
+    cin >> n >> m;
+    For(i, 0, n)
     {
-        pref[i] = pref[i - 1] + ar[i];
+        cin >> ar[i];
     }
+    build(1, 0, n - 1);
 
     while (m--)
     {
-        int l, r;
-        read2(l, r);
-        l--, r--;
-        if (l)
-            cout << pref[r] - pref[l - 1] << endl;
+        int t, x, y;
+        read3(t, x, y);
+        if (t == 1)
+        {
+            update(1, 0, n - 1, x - 1, y);
+            ar[x] = y;
+        }
         else
-            cout << pref[r] << endl;
+            cout << minVal(1, 0, n - 1, x - 1, y - 1) << endl;
     }
 }
 
