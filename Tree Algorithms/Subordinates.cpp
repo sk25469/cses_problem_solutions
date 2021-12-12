@@ -175,8 +175,7 @@ ll binpow(ll a, ll b)
 }
 
 const int MAXN = 2e5 + 1;
-vi adj[MAXN];
-vi siz(MAXN, 1);
+vi adj[MAXN], siz(MAXN, 1);
 bool vis[MAXN];
 int n;
 
