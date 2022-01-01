@@ -165,23 +165,30 @@ ll binpow(ll a, ll b)
 }
 
 const int MAXM = 2e5 + 1;
-vector<int> adj[MAXM];
-// maxD is the maximum depth of the node, and maxNode is the node at that depth
-int maxD = -1, maxNode = -1;
-bool vis[MAXM];
+vi adj[MAXM];
 
-void dfs(int node, int depth)
+// we find the 2 edges with most distance from the root, a and b
+// dp[0][i] => distance from a to i
+// dp[1][i] => distance from b to i
+int dp[2][MAXM];
+
+int dfs(int curr, int par, int depth, int i)
 {
-    vis[node] = 1;
-
-    if (depth > maxD)
-        maxNode = node, maxD = depth;
-
-    for (int next : adj[node])
+    dp[i][curr] = depth;
+    int opt = -1;
+    for (int next : adj[curr])
     {
-        if (!vis[next])
-            dfs(next, depth + 1);
+        if (next != par)
+        {
+            int x = dfs(next, curr, depth + 1, i);
+
+            // we are storing the depth of curr node
+            if (opt == -1 || dp[i][x] > dp[i][opt])
+                opt = x;
+        }
     }
+
+    return opt == -1 ? curr : opt;
 }
 
 void solve()
@@ -197,16 +204,19 @@ void solve()
         adj[y].pb(x);
     }
 
-    dfs(1, 1);
-    debug(maxD);
+    int a = dfs(1, 1, 0, 0);
 
-    maxD = -1;
+    // in this dfs, we will also calculate the distance from a to each node
+    int b = dfs(a, a, 0, 0);
 
-    mem(vis, 0);
+    // we say that max distance from each node will be one of the 2 nodes
+    // at the most length from the root
 
-    dfs(maxNode, 1);
+    // distance from b to every node
+    dfs(b, b, 0, 1);
 
-    pf(maxD - 1);
+    for (int i = 1; i <= n; i++)
+        cout << max(dp[0][i], dp[1][i]) << " \n"[i == n];
 }
 
 int main()

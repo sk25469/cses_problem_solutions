@@ -165,31 +165,42 @@ ll binpow(ll a, ll b)
 }
 
 const int MAXM = 2e5 + 1;
-vector<int> adj[MAXM];
-// maxD is the maximum depth of the node, and maxNode is the node at that depth
-int maxD = -1, maxNode = -1;
-bool vis[MAXM];
+vi adj[MAXM];
+ll dp[MAXM], ans[MAXM];
+int n;
 
-void dfs(int node, int depth)
+void dfs1(int curr = 1, int par = 0, ll depth = 0)
 {
-    vis[node] = 1;
+    dp[curr] = 1;
+    ans[1] += depth;
 
-    if (depth > maxD)
-        maxNode = node, maxD = depth;
+    for (int next : adj[curr])
+    {
+        if (next != par)
+        {
+            dfs1(next, curr, depth + 1);
+            dp[curr] += dp[next];
+        }
+    }
+}
 
+void dfs2(int node = 1, int par = 0)
+{
     for (int next : adj[node])
     {
-        if (!vis[next])
-            dfs(next, depth + 1);
+        if (next != par)
+        {
+            ans[next] = ans[node] + n - 2 * dp[next];
+            dfs2(next, node);
+        }
     }
 }
 
 void solve()
 {
-    int n;
     cin >> n;
 
-    for (int i = 0; i < n - 1; i++)
+    for (int i = 1; i < n; i++)
     {
         int x, y;
         in2(x, y);
@@ -197,16 +208,11 @@ void solve()
         adj[y].pb(x);
     }
 
-    dfs(1, 1);
-    debug(maxD);
+    dfs1();
+    dfs2();
 
-    maxD = -1;
-
-    mem(vis, 0);
-
-    dfs(maxNode, 1);
-
-    pf(maxD - 1);
+    for (int i = 1; i <= n; i++)
+        cout << ans[i] << " \n"[i == n];
 }
 
 int main()

@@ -164,49 +164,49 @@ ll binpow(ll a, ll b)
     return res;
 }
 
-const int MAXM = 2e5 + 1;
-vector<int> adj[MAXM];
-// maxD is the maximum depth of the node, and maxNode is the node at that depth
-int maxD = -1, maxNode = -1;
-bool vis[MAXM];
+const int MAXM = 2e5 + 5;
+const int MAXS = 18;
+int n;
 
-void dfs(int node, int depth)
+// up[i][j] -> ith ancestor of j
+int up[MAXS][MAXM];
+
+// dth ancestor of x
+int jump(int x, int d)
 {
-    vis[node] = 1;
-
-    if (depth > maxD)
-        maxNode = node, maxD = depth;
-
-    for (int next : adj[node])
+    For(i, 0, MAXS)
     {
-        if (!vis[next])
-            dfs(next, depth + 1);
+        if ((d >> i) & 1)
+            x = up[i][x];
     }
+
+    return x ?: -1; // modfication to return -1 if not found
 }
 
 void solve()
 {
-    int n;
-    cin >> n;
+    int q;
+    cin >> n >> q;
 
-    for (int i = 0; i < n - 1; i++)
+    for (int i = 2; i <= n; i++)
     {
-        int x, y;
-        in2(x, y);
-        adj[x].pb(y);
-        adj[y].pb(x);
+        int x;
+        cin >> x;
+        up[0][i] = x;
     }
 
-    dfs(1, 1);
-    debug(maxD);
+    for (int ancestor = 1; ancestor < MAXS; ancestor++)
+    {
+        for (int node = 1; node <= n; node++)
+            up[ancestor][node] = up[ancestor - 1][up[ancestor - 1][node]];
+    }
 
-    maxD = -1;
-
-    mem(vis, 0);
-
-    dfs(maxNode, 1);
-
-    pf(maxD - 1);
+    while (q--)
+    {
+        int x, d;
+        in2(x, d);
+        pf(jump(x, d));
+    }
 }
 
 int main()
